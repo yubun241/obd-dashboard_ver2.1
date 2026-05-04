@@ -1,14 +1,12 @@
-// ═══════════════════════════════════════════════
-// 藤井工藝 OBD DASH Ver3 - Service Worker
-// バージョンを変えるたびに古いキャッシュを自動破棄します
-// ═══════════════════════════════════════════════
-const CACHE_VERSION = 'fujii-kogei-v3-002';
+const CACHE_VERSION = 'fujii-kogei-v3-003';
 const CACHE_FILES = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', event => {
@@ -38,7 +36,6 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.url.includes('bluetooth')) return;
-
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
