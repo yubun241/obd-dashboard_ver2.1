@@ -2,10 +2,12 @@
 // 藤井工藝 OBD DASH Ver3 - Service Worker
 // バージョンを変えるたびに古いキャッシュを自動破棄します
 // ═══════════════════════════════════════════════
-const CACHE_VERSION = 'fujii-kogei-v3-001';
+const CACHE_VERSION = 'fujii-kogei-v3-002';
 const CACHE_FILES = [
   './',
   './index.html',
+  './styles.css',
+  './app.js',
   './manifest.json',
 ];
 

@@ -1,7 +1,7 @@
 {
   "name": "藤井工藝 OBD DASH Ver3",
   "short_name": "OBD DASH",
-  "description": "BLE OBD2 リアルタイム ダッシュボード - 選択式ウィジェット / Gメーター / Est.HP",
+  "description": "BLE OBD2 リアルタイム ダッシュボード - 選択式ウィジェット / Gメーター / Est.HP / TIMER",
   "start_url": "./index.html",
   "display": "fullscreen",
   "orientation": "landscape",
