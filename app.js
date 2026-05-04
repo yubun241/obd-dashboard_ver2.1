@@ -1,6 +1,6 @@
 'use strict';
 // ════════════════════════════════════════════════
-// 藤井工藝 GT DASH Ver.1 — app.js
+// 藤井工藝 OBD DASH Ver.3 — app.js
 // ════════════════════════════════════════════════
 
 const G_PER_MS2 = 1/9.80665;  // m/s² → G
@@ -1038,8 +1038,41 @@ function bindEvents(){
 }
 
 // ═══════════════════════════════════════════
+// SPLASH
+// ═══════════════════════════════════════════
+function showSplash(){
+  const splash = document.createElement('div');
+  splash.id = 'splash';
+  Object.assign(splash.style, {
+    position:'fixed', inset:'0', zIndex:'9999',
+    background:'#000',
+    display:'flex', flexDirection:'column',
+    alignItems:'center', justifyContent:'center',
+    gap:'12px',
+    transition:'opacity 0.6s ease',
+  });
+  splash.innerHTML = `
+    <div style="font-style:italic;font-weight:900;
+      font-size:clamp(28px,6vw,56px);
+      letter-spacing:0.12em;color:#ffffff;">藤井工藝</div>
+    <div style="font-style:italic;font-weight:700;
+      font-size:clamp(14px,2.8vw,26px);
+      letter-spacing:0.3em;color:#00b4ff;">OBD DASH</div>
+    <div style="font-size:clamp(9px,1.2vw,12px);
+      letter-spacing:0.2em;color:#5a6068;margin-top:4px;">Ver.3</div>`;
+  document.body.appendChild(splash);
+
+  // 3秒後にフェードアウト → 削除
+  setTimeout(()=>{
+    splash.style.opacity = '0';
+    setTimeout(()=>splash.remove(), 650);
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
+showSplash();
 buildLeds();
 applyBoostVisibility();
 buildPanels();
