@@ -1,6 +1,6 @@
 # 藤井工藝 OBD DASH Ver.3
 
-**Mini F56 JCW など 専用 BLE OBD2 リアルタイムダッシュボード**
+**BLE OBD2 リアルタイムダッシュボード**
 
 ![PWA](https://img.shields.io/badge/PWA-対応-4AABFF?style=flat-square)
 ![BLE](https://img.shields.io/badge/接続-BLE%20ELM327-22e54a?style=flat-square)
