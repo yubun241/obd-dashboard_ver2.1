@@ -6,7 +6,7 @@ const CACHE_VERSION = 'fujii-kogeiv-v19';
 const CACHE_FILES = [
   './',
   './index.html',
-  './icon.png',
+  './icon-512.png',
   './icon-192.png',
   './manifest.json',
 ];
