@@ -1,6 +1,6 @@
 {
-  "name": "藤井工藝 OBD DASH Ver3",
-  "short_name": "OBD DASH",
+  "name": "藤井工藝 GT DASH Ver1",
+  "short_name": "GT DASH",
   "description": "BLE OBD2 リアルタイム ダッシュボード",
   "start_url": "./index.html",
   "display": "fullscreen",
