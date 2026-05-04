@@ -1,1 +1,8 @@
-
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "jp.co.fujii_kogei.obd2gtdash",
+        "sha256_cert_fingerprints": ["89:65:E4:74:5F:78:BD:54:C0:D1:E0:FF:C8:5C:B0:BE:7A:94:44:DB:2F:37:32:65:E3:B3:28:CF:13:CB:5D:D0"]
+      }
+    }]
