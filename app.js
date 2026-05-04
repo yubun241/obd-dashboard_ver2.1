@@ -1,6 +1,6 @@
 'use strict';
 // ════════════════════════════════════════════════
-// 藤井工藝 GT DASH Ver.1 — app.js
+// 藤井工藝 OBD DASH Ver.3 — app.js
 // ════════════════════════════════════════════════
 
 const G_PER_MS2 = 1/9.80665;  // m/s² → G
@@ -1053,13 +1053,13 @@ function showSplash(){
   });
   splash.innerHTML = `
     <div style="font-style:italic;font-weight:900;
-      font-size:clamp(28px,6vw,56px);
-      letter-spacing:0.12em;color:#ffffff;">藤井工藝</div>
+      font-size:clamp(36px,8vw,72px);
+      letter-spacing:0.08em;color:#ffffff;">GT DASH</div>
     <div style="font-style:italic;font-weight:700;
       font-size:clamp(14px,2.8vw,26px);
-      letter-spacing:0.3em;color:#00b4ff;">OBD DASH</div>
+      letter-spacing:0.3em;color:#22e54a;">藤井工藝</div>
     <div style="font-size:clamp(9px,1.2vw,12px);
-      letter-spacing:0.2em;color:#5a6068;margin-top:4px;">Ver.3</div>`;
+      letter-spacing:0.2em;color:#5a6068;margin-top:4px;">Ver.1</div>`;
   document.body.appendChild(splash);
 
   // 3秒後にフェードアウト → 削除
