@@ -15,7 +15,6 @@
     --text:#ffffff;--text-dim:#9aa0a6;--text-mute:#5a6068;
     --accent:#00b4ff;--warn:#ff3d1a;
     --boost:#ffd200;--hp:#ff8000;
-    --led-green:#22e54a;--led-yellow:#ffc400;--led-red:#ff2a18;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{
@@ -27,9 +26,11 @@
       repeating-linear-gradient(-45deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 3px);
   }
 
-  /* ════ TOP: LED + RPM + BOOST [固定] ════ */
+  /* ════ TOP ════ */
   #top{flex:0 0 52%;display:flex;flex-direction:column;position:relative;
-    border-bottom:1px solid var(--line-2);overflow:hidden;}
+    border-bottom:1px solid var(--line-2);overflow:hidden;
+    transition:flex-basis 0.2s;}
+  #top.full{flex:1 1 100%;border-bottom:none;}
   #led-bar{flex:0 0 auto;display:flex;align-items:center;justify-content:center;
     gap:clamp(4px,1.6vw,14px);padding:6px 8vw 4px 4vw;position:relative;}
   .led{width:clamp(14px,3vw,26px);height:clamp(14px,3vw,26px);border-radius:50%;
@@ -77,8 +78,10 @@
   #rpm-unit{font-style:italic;font-size:clamp(10px,1.2vw,13px);
     color:var(--text-mute);letter-spacing:0.18em;margin-top:1px;}
 
-  /* ════ MAIN: 5枠等幅 ════ */
-  #main{flex:1 1 0;display:flex;min-height:0;padding:4px;gap:4px;}
+  /* ════ MAIN: 動的1〜5枠 ════ */
+  #main{flex:1 1 0;display:flex;min-height:0;padding:4px;gap:4px;
+    transition:flex-basis 0.2s;}
+  #main.empty{display:none;}
   .panel{flex:1 1 0;min-width:0;
     background:linear-gradient(180deg,#0d0d0d 0%,#050505 100%);
     border:1px solid var(--line);border-radius:8px;
@@ -133,7 +136,12 @@
   .gb-circle{width:min(38dvh,calc(100% - 4px));aspect-ratio:1;border-radius:50%;
     border:1px solid #1e3020;
     background:radial-gradient(circle at 50% 50%,#020f04 0%,#000 80%);
-    position:relative;overflow:hidden;flex-shrink:0;}
+    position:relative;overflow:hidden;flex-shrink:0;
+    transition:border-color 0.15s,box-shadow 0.15s;}
+  .gb-circle.alert{
+    border-color:var(--warn);
+    box-shadow:0 0 10px rgba(255,61,26,0.6),inset 0 0 12px rgba(255,61,26,0.4);
+    background:radial-gradient(circle at 50% 50%,#1f0404 0%,#0a0000 80%);}
   .gb-ring{position:absolute;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
   .gb-ring-half{width:50%;height:50%;border:1px solid #152018;}
   .gb-ring-full{width:99%;height:99%;border:1px solid #1e3020;}
@@ -149,10 +157,17 @@
     background:radial-gradient(circle at 35% 30%,#ccffe0 0%,#00ff88 45%,#00b455 100%);
     box-shadow:0 0 6px rgba(0,255,136,0.9),0 0 18px rgba(0,255,136,0.4);
     transform:translate(-50%,-50%);left:50%;top:50%;
-    transition:left 0.05s linear,top 0.05s linear;z-index:5;}
+    transition:left 0.05s linear,top 0.05s linear,
+      background 0.1s,box-shadow 0.1s;
+    z-index:5;}
+  .gb-dot.alert{
+    background:radial-gradient(circle at 35% 30%,#ffd0c8 0%,#ff3d1a 40%,#a00000 100%);
+    box-shadow:0 0 12px rgba(255,61,26,1),0 0 28px rgba(255,61,26,0.7),
+      inset 0 0 8px rgba(255,255,255,0.3);}
   .gb-vals{font-size:clamp(8px,1.1vw,10px);color:var(--text-mute);
     text-align:center;flex:0 0 auto;letter-spacing:0.04em;}
   .gb-val-num{font-style:italic;font-weight:bold;color:var(--text-dim);}
+  .gb-val-num.alert{color:var(--warn);}
 
   /* HP BAR */
   .hp-bar-track{width:calc(100% - 4px);height:3px;background:#111;
@@ -188,8 +203,8 @@
     border-bottom:1px solid var(--line);padding-bottom:6px;letter-spacing:0.05em;}
   .mdl-box h4{color:var(--boost);font-size:12px;margin:14px 0 6px;letter-spacing:0.08em;}
   .cfg-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px;}
-  .cfg-row label{color:var(--text-dim);min-width:78px;}
-  .cfg-row input[type=number]{background:#000;color:var(--text);
+  .cfg-row label{color:var(--text-dim);min-width:88px;}
+  .cfg-row input[type=number],.cfg-row input[type=text]{background:#000;color:var(--text);
     border:1px solid var(--line);border-radius:4px;padding:4px 6px;
     width:80px;font-size:11px;font-family:inherit;}
   .cfg-row select{background:#000;color:var(--text);
@@ -208,8 +223,11 @@
   #btn-cfg-save{background:var(--accent);color:#000;}
   #btn-cfg-reset{background:var(--hp);color:#000;}
   #btn-cfg-cancel{background:var(--line);color:var(--text-dim);}
+  .cfg-btn-inline{background:#1a1a1a;color:var(--accent);
+    border:1px solid var(--accent);border-radius:4px;
+    padding:3px 9px;font-size:11px;cursor:pointer;letter-spacing:0.05em;}
 
-  /* PICKER */
+  /* PICKER (絵文字なし) */
   .picker-mdl{align-items:center;}
   .picker-box{background:#080808;border:1px solid var(--line);border-radius:14px;
     padding:16px;width:min(540px,95vw);}
@@ -219,16 +237,17 @@
   .picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
   @media (min-width:480px){.picker-grid{grid-template-columns:repeat(5,1fr);}}
   .picker-card{background:#0e0e0e;border:1px solid var(--line);border-radius:10px;
-    padding:10px 6px 8px;text-align:center;cursor:pointer;
+    padding:14px 6px;text-align:center;cursor:pointer;
     transition:border-color 0.12s,background 0.12s;
-    display:flex;flex-direction:column;align-items:center;gap:4px;}
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:5px;min-height:64px;}
   .picker-card:active{border-color:var(--accent);background:#061016;}
   .picker-card.active{border-color:var(--accent);background:#041018;
     box-shadow:0 0 10px rgba(0,180,255,0.18);}
-  .picker-card-ico{font-size:clamp(18px,3.5vw,26px);line-height:1;display:block;}
-  .picker-card-lbl{font-size:clamp(9px,1.4vw,11px);color:var(--text-dim);
-    letter-spacing:0.06em;line-height:1.2;}
-  .picker-card-val{font-size:clamp(8px,1vw,10px);color:var(--text-mute);margin-top:1px;}
+  .picker-card-lbl{font-size:clamp(11px,1.6vw,13px);color:var(--text);
+    letter-spacing:0.06em;line-height:1.2;font-weight:bold;}
+  .picker-card-val{font-size:clamp(9px,1.1vw,11px);color:var(--text-mute);
+    margin-top:1px;font-style:italic;}
   .picker-cancel{width:100%;padding:9px;background:var(--line);color:var(--text-dim);
     border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;}
 
@@ -272,13 +291,7 @@
   <div id="rpm-zone"><div id="rpm-val">0</div><div id="rpm-unit">RPM</div></div>
 </div>
 
-<div id="main">
-  <div class="panel slot-panel" id="slot-0"></div>
-  <div class="panel slot-panel" id="slot-1"></div>
-  <div class="panel slot-panel" id="slot-2"></div>
-  <div class="panel slot-panel" id="slot-3"></div>
-  <div class="panel slot-panel" id="slot-4"></div>
-</div>
+<div id="main"></div>
 
 <div id="status">
   <span id="conn-label">OBD: Disconnected</span>
@@ -300,6 +313,20 @@
 <div id="modal-cfg" class="mdl">
   <div class="mdl-box">
     <h3>⚙ セッティング</h3>
+
+    <h4>パネル数</h4>
+    <div class="cfg-row">
+      <label>表示パネル</label>
+      <select id="cfg-panelcount">
+        <option value="0">なし (RPMのみ)</option>
+        <option value="1">1個</option>
+        <option value="2">2個</option>
+        <option value="3">3個</option>
+        <option value="4">4個</option>
+        <option value="5">5個</option>
+      </select>
+    </div>
+    <div class="cfg-note">※ 個数を変えると等幅で自動分割</div>
 
     <h4>OBD レスポンスモード</h4>
     <div class="cfg-row">
@@ -339,15 +366,23 @@
       <input type="number" id="cfg-maxhp" step="10" style="width:80px;"> PS (バー満タン基準)
     </div>
 
-    <h4>G センサー</h4>
+    <h4>G センサー (G-METER)</h4>
     <div class="cfg-row">
-      <label>軸スワップ</label>
-      <select id="cfg-gswapxy">
-        <option value="false">OFF (X=横, Y=縦)</option>
-        <option value="true">ON  (X=縦, Y=横)</option>
-      </select>
+      <label>表示範囲</label>
+      <input type="number" id="cfg-gmaxg" step="0.1" min="0.5" max="10" style="width:70px;"> G
+      <span style="color:var(--text-mute);font-size:10px;">(円の端の値)</span>
     </div>
     <div class="cfg-row">
+      <label>アラート閾値</label>
+      <input type="number" id="cfg-galertg" step="0.1" min="0.1" max="10" style="width:70px;"> G
+      <span style="color:var(--text-mute);font-size:10px;">(超えると赤発光)</span>
+    </div>
+    <div class="cfg-row">
+      <label>キャリブレーション</label>
+      <button class="cfg-btn-inline" onclick="calibrateG()">今この姿勢をセンター</button>
+    </div>
+    <div class="cfg-note">※ 立てた状態で停車中に押す</div>
+    <div class="cfg-row" style="margin-top:6px;">
       <label>横軸 反転</label>
       <select id="cfg-ginvertx">
         <option value="false">正方向</option>
@@ -361,11 +396,6 @@
         <option value="true">反転</option>
       </select>
     </div>
-    <div class="cfg-row">
-      <label>表示範囲</label>
-      <input type="number" id="cfg-gmaxg" step="0.5" style="width:70px;"> m/s² (1G=9.8)
-    </div>
-    <div class="cfg-note">※ 横向き・インカメラ右側 想定</div>
 
     <h4>RPM ドット / 警告</h4>
     <div class="cfg-row">
@@ -431,49 +461,69 @@
 <script>
 'use strict';
 
-const PANEL_COUNT = 5;
+const G_PER_MS2 = 1/9.80665;  // m/s² → G
 
 const S = {
   rpm:0,speed:0,coolant:null,intake:null,
   mapKpa:null,boost:null,oilTemp:null,throttle:null,instHP:null,
-  gx:0,gy:0,
+  gx:0, gy:0,                 // 表示用 [G]
   gear:'N',gearCand:'N',gearCnt:0,
   conn:'Disconnected',device:null,txChar:null,
   polling:false,waiting:false,buf:'',
-  curPid:'',pidQueue:[],pidParsedThisCycle:false,
+  curPid:'',pidQueue:[],
 };
 
+// ═══════════════════════════════════════════
+// WIDGET 定義 (PID情報を持たせて取得最適化)
+// ═══════════════════════════════════════════
 const WIDGETS = {
-  gear:    {label:'GEAR',     unit:'',       color:'#00b4ff',accent:'#00b4ff',icon:'⚙',
-            getValue:()=>S.gear,                            isWarn:()=>false, special:'gear'},
-  speed:   {label:'SPEED',    unit:'km/h',   color:'#ffffff',accent:'#ffd200',icon:'🏎',
-            getValue:()=>S.speed,                           isWarn:()=>false, special:false},
-  intake:  {label:'INTAKE',   unit:'°C',     color:'#22e54a',accent:'#22e54a',icon:'🌡',
+  gear:    {label:'GEAR',     unit:'',       color:'#00b4ff',accent:'#00b4ff',
+            getValue:()=>S.gear,                     isWarn:()=>false,
+            special:'gear',  pids:['010C','010D']},
+  speed:   {label:'SPEED',    unit:'km/h',   color:'#ffffff',accent:'#ffd200',
+            getValue:()=>S.speed,                    isWarn:()=>false,
+            special:false,   pids:['010D']},
+  intake:  {label:'INTAKE',   unit:'°C',     color:'#22e54a',accent:'#22e54a',
             getValue:()=>S.intake,
-            isWarn:()=>S.intake!==null&&S.intake>=70,        special:false},
-  coolant: {label:'COOLANT',  unit:'°C',     color:'#00b4ff',accent:'#00b4ff',icon:'💧',
+            isWarn:()=>S.intake!==null&&S.intake>=70,
+            special:false,   pids:['010F']},
+  coolant: {label:'COOLANT',  unit:'°C',     color:'#00b4ff',accent:'#00b4ff',
             getValue:()=>S.coolant,
-            isWarn:()=>S.coolant!==null&&S.coolant>=105,    special:false},
-  oiltemp: {label:'OIL TEMP', unit:'°C',     color:'#ff8000',accent:'#ff3d1a',icon:'🛢',
+            isWarn:()=>S.coolant!==null&&S.coolant>=105,
+            special:false,   pids:['0105']},
+  oiltemp: {label:'OIL TEMP', unit:'°C',     color:'#ff8000',accent:'#ff3d1a',
             getValue:()=>S.oilTemp,
-            isWarn:()=>S.oilTemp!==null&&S.oilTemp>=130,    special:false},
-  boost:   {label:'BOOST',    unit:'kg/cm²', color:'#ffd200',accent:'#ffd200',icon:'💨',
+            isWarn:()=>S.oilTemp!==null&&S.oilTemp>=130,
+            special:false,   pids:['015C']},
+  boost:   {label:'BOOST',    unit:'kg/cm²', color:'#ffd200',accent:'#ffd200',
             getValue:()=>S.boost!==null?S.boost.toFixed(2):null,
-            isWarn:()=>false,                                special:false},
-  throttle:{label:'THROTTLE', unit:'%',      color:'#00ff88',accent:'#00ff88',icon:'🎯',
-            getValue:()=>S.throttle,                        isWarn:()=>false, special:'thr'},
-  insthp:  {label:'EST.HP',   unit:'PS',     color:'#ff8000',accent:'#ff8000',icon:'⚡',
-            getValue:()=>S.instHP,                          isWarn:()=>false, special:'hp'},
-  gball:   {label:'G-METER',  unit:'',       color:'#00ff88',accent:'#00ff88',icon:'🔵',
-            getValue:()=>null,                              isWarn:()=>false, special:'gball'},
+            isWarn:()=>false,
+            special:false,   pids:['010B']},
+  throttle:{label:'THROTTLE', unit:'%',      color:'#00ff88',accent:'#00ff88',
+            getValue:()=>S.throttle,                 isWarn:()=>false,
+            special:'thr',   pids:['0111']},
+  insthp:  {label:'EST.HP',   unit:'PS',     color:'#ff8000',accent:'#ff8000',
+            getValue:()=>S.instHP,                   isWarn:()=>false,
+            special:'hp',    pids:['010B','010C']},
+  gball:   {label:'G-METER',  unit:'',       color:'#00ff88',accent:'#00ff88',
+            getValue:()=>null,                       isWarn:()=>false,
+            special:'gball', pids:[]},
 };
 const WIDGET_KEYS = Object.keys(WIDGETS);
 
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
 const DEFAULT_CFG = {
+  panelCount:5,
   responseMode:'double',
   showBoost:true,boostMin:-0.5,boostMax:2.0,
   hpCoeff:0.000197,maxHP:250,
-  gSwapXY:false,gInvertX:false,gInvertY:false,gMaxG:9.8,
+  // G-meter (G単位)
+  gMaxG:1.5,           // 表示円の端=1.5G
+  gAlertG:1.0,         // 1.0Gでアラート
+  gInvertX:false, gInvertY:false,
+  // RPM
   maxRpm:6200,warnRpm:4800,rpmDots:12,
   dotConfig:[
     {color:'green',threshold:1000},{color:'green',threshold:1500},
@@ -503,10 +553,9 @@ function loadSlots(){
       if(s.length===4 && !s.includes('gear')){
         return [s[0],s[1],'gear',s[2],s[3]];
       }
-      if(s.length===PANEL_COUNT){
+      if(s.length>=0 && s.length<=5){
         return s.map(k=>WIDGETS[k]?k:'speed');
       }
-      // それ以外は無効
     }
   }catch(_){}
   return [...DEFAULT_SLOTS];
@@ -515,24 +564,73 @@ function saveSlots(arr){try{localStorage.setItem('gtdash_slots_v3',JSON.stringif
 
 let CFG=loadCfg();
 let PANEL_SLOTS=loadSlots();
+// パネル数とSlotsの整合
+if (PANEL_SLOTS.length !== CFG.panelCount) {
+  resizeSlots(CFG.panelCount);
+}
 
+function resizeSlots(n){
+  n=Math.max(0,Math.min(5,n|0));
+  if(n===PANEL_SLOTS.length) return;
+  if(n<PANEL_SLOTS.length){PANEL_SLOTS=PANEL_SLOTS.slice(0,n);}
+  else{
+    while(PANEL_SLOTS.length<n){
+      PANEL_SLOTS.push(DEFAULT_SLOTS[PANEL_SLOTS.length]||'speed');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+// OBD PID (動的に決定)
+// ═══════════════════════════════════════════
 const ELM_SERVICES=[
   '0000ffe0-0000-1000-8000-00805f9b34fb',
   '0000fff0-0000-1000-8000-00805f9b34fb',
   '000018f0-0000-1000-8000-00805f9b34fb',
   '0000ffe5-0000-1000-8000-00805f9b34fb',
 ];
-const PIDS_FAST=['010C','010D'];
-const PIDS_SLOW_BASE=['015C','010B','0105','010F','0111'];
 const NOISE=['NODATA','ERROR','UNABLE','SEARCHING','STOPPED','BUSBUSY'];
+
+let ACTIVE_PIDS_FAST=['010C'];     // 高頻度: RPM (TOPで常時表示)
+let ACTIVE_PIDS_SLOW=[];           // 低頻度ローテーション
+
+function recomputeActivePids(){
+  const fast=new Set();
+  const slow=new Set();
+  // RPMはTOPで常時必要
+  fast.add('010C');
+  // TOPブーストバー
+  if(CFG.showBoost) slow.add('010B');
+  // 各パネルのウィジェットが必要なPID
+  for(const wid of PANEL_SLOTS){
+    const def=WIDGETS[wid];
+    if(!def||!def.pids) continue;
+    for(const pid of def.pids){
+      // 高頻度: RPM(010C), 速度(010D)
+      if(pid==='010C'||pid==='010D') fast.add(pid);
+      else slow.add(pid);
+    }
+  }
+  ACTIVE_PIDS_FAST=[...fast];
+  ACTIVE_PIDS_SLOW=[...slow];
+  _slowIdx=0;
+  S.pidQueue=[];  // 次サイクルから新セットで開始
+  dbg('[PID] fast='+JSON.stringify(ACTIVE_PIDS_FAST)+' slow='+JSON.stringify(ACTIVE_PIDS_SLOW));
+}
+
 let _slowIdx=0;
 function nextPids(){
-  const pids=[...PIDS_FAST];
-  if(_slowIdx<PIDS_SLOW_BASE.length) pids.push(PIDS_SLOW_BASE[_slowIdx]);
-  _slowIdx=(_slowIdx+1)%PIDS_SLOW_BASE.length;
+  const pids=[...ACTIVE_PIDS_FAST];
+  if(ACTIVE_PIDS_SLOW.length>0){
+    pids.push(ACTIVE_PIDS_SLOW[_slowIdx % ACTIVE_PIDS_SLOW.length]);
+    _slowIdx++;
+  }
   return pids;
 }
 
+// ═══════════════════════════════════════════
+// GEAR
+// ═══════════════════════════════════════════
 function buildGearTable(){
   const circ=Math.PI*CFG.tireDiamMm/1000;
   const factor=CFG.finalDrive*1000/(circ*60);
@@ -572,6 +670,9 @@ function computeInstHP(){
   }else{S.instHP=null;}
 }
 
+// ═══════════════════════════════════════════
+// LED
+// ═══════════════════════════════════════════
 function buildLeds(){
   const bar=document.getElementById('led-bar');
   bar.innerHTML='';
@@ -592,6 +693,29 @@ function updateLeds(){
     const cc=['green','yellow','red','blue','orange','white'].includes(dc.color)?dc.color:'green';
     d.className=S.rpm>=dc.threshold?`led ${cc} on`:`led ${cc}`;
   }
+}
+
+// ═══════════════════════════════════════════
+// PANELS (動的生成 0〜5)
+// ═══════════════════════════════════════════
+function buildPanels(){
+  const main=document.getElementById('main');
+  const top=document.getElementById('top');
+  main.innerHTML='';
+  if(PANEL_SLOTS.length===0){
+    main.classList.add('empty');
+    top.classList.add('full');
+    return;
+  }
+  main.classList.remove('empty');
+  top.classList.remove('full');
+  for(let i=0;i<PANEL_SLOTS.length;i++){
+    const div=document.createElement('div');
+    div.className='panel slot-panel';
+    div.id=`slot-${i}`;
+    main.appendChild(div);
+  }
+  renderAllSlots();
 }
 
 function renderSlot(i){
@@ -660,41 +784,96 @@ function renderSlot(i){
       </div>`;
   }
 }
-function renderAllSlots(){for(let i=0;i<PANEL_COUNT;i++) renderSlot(i);}
+function renderAllSlots(){for(let i=0;i<PANEL_SLOTS.length;i++) renderSlot(i);}
+
+// ═══════════════════════════════════════════
+// G-SENSOR (重力ローパス除去 + キャリブレーション)
+// ═══════════════════════════════════════════
+//
+// 設計:
+//  - スマホ「立てた状態(画面が垂直)」で使用
+//  - 重力ベクトルをローパスフィルタで動的推定 → 引いて純加速度を得る
+//  - 純加速度を「画面平面」に投影:
+//      水平軸 = 端末x軸方向 (画面の長辺方向 = 横向きでは車両左右)
+//      垂直軸 = 端末y軸方向 (画面の短辺方向 = 横向きでは車両前後)
+//    ※ 「内カメラ右」横向きでは、車両前進=画面左方向(端末-x)、旋回=画面上下(端末y)になるが、
+//      キャリブ後の重力除去で姿勢に依存せず正しく出る
+//
+let _gravX=0,_gravY=0,_gravZ=0,_gInit=false;
+const G_LP_ALPHA=0.92;  // 重力推定の追従速度 (大きいほど鈍い=安定)
+let _calibPending=false;
+
+function calibrateG(){
+  // 現在の加速度ベクトルを「重力(=ゼロ点)」として即時記録
+  _calibPending=true;
+}
 
 function setupGSensor(){
   if(typeof DeviceMotionEvent==='undefined') return;
   window.addEventListener('devicemotion',onMotion,{passive:true});
 }
+
 function onMotion(e){
   const a=e.accelerationIncludingGravity;
-  if(!a) return;
-  let rawLat=CFG.gSwapXY?(a.y||0):(a.x||0);
-  let rawLon=CFG.gSwapXY?(a.x||0):(a.y||0);
-  S.gx=rawLat*(CFG.gInvertX?-1:1);
-  S.gy=rawLon*(CFG.gInvertY?-1:1);
+  if(!a||a.x===null||a.x===undefined) return;
+  const ax=a.x||0, ay=a.y||0, az=a.z||0;
+
+  // 重力推定 (初回 or キャリブ要求 → 即セット)
+  if(!_gInit||_calibPending){
+    _gravX=ax; _gravY=ay; _gravZ=az;
+    _gInit=true; _calibPending=false;
+  }else{
+    _gravX=G_LP_ALPHA*_gravX + (1-G_LP_ALPHA)*ax;
+    _gravY=G_LP_ALPHA*_gravY + (1-G_LP_ALPHA)*ay;
+    _gravZ=G_LP_ALPHA*_gravZ + (1-G_LP_ALPHA)*az;
+  }
+
+  // 純加速度 (重力除去) [m/s²]
+  const lx=ax-_gravX;
+  const ly=ay-_gravY;
+  // const lz=az-_gravZ;  // 画面奥行き方向は今回未使用
+
+  // [G]に変換 + 画面平面へ投影
+  // 「立てた・内カメラ右」想定 → 端末x軸=画面長辺=横方向, 端末y軸=画面短辺=縦方向
+  S.gx = lx * G_PER_MS2 * (CFG.gInvertX?-1:1);
+  S.gy = ly * G_PER_MS2 * (CFG.gInvertY?-1:1);
+
   updateGballs();
 }
+
 function updateGballs(){
-  const maxG=CFG.gMaxG||9.8;
-  for(let i=0;i<PANEL_COUNT;i++){
+  const maxG=CFG.gMaxG||1.5;
+  const alertG=CFG.gAlertG||1.0;
+  const total=Math.sqrt(S.gx*S.gx+S.gy*S.gy);
+  const isAlert=total>=alertG;
+
+  for(let i=0;i<PANEL_SLOTS.length;i++){
     if(PANEL_SLOTS[i]!=='gball') continue;
     const el=document.getElementById(`slot-${i}`);
     if(!el) continue;
     const dot=el.querySelector('.gb-dot');
-    if(!dot) continue;
+    const circ=el.querySelector('.gb-circle');
+    if(!dot||!circ) continue;
+    // 位置 (中央=50%, 端=±45%)
     const pctX=50+(S.gx/maxG)*45;
-    const pctY=50-(S.gy/maxG)*45;
+    const pctY=50-(S.gy/maxG)*45;  // Y上向き=画面上=A方向
     dot.style.left=clamp(pctX,5,95).toFixed(1)+'%';
-    dot.style.top=clamp(pctY,5,95).toFixed(1)+'%';
+    dot.style.top =clamp(pctY,5,95).toFixed(1)+'%';
+    // アラート
+    dot.classList.toggle('alert',isAlert);
+    circ.classList.toggle('alert',isAlert);
+    // 数値
     const vx=el.querySelector('.gb-vx');
     const vy=el.querySelector('.gb-vy');
-    if(vx) vx.textContent=(S.gx/9.8).toFixed(2);
-    if(vy) vy.textContent=(S.gy/9.8).toFixed(2);
+    if(vx){vx.textContent=S.gx.toFixed(2); vx.classList.toggle('alert',isAlert);}
+    if(vy){vy.textContent=S.gy.toFixed(2); vy.classList.toggle('alert',isAlert);}
   }
 }
 function clamp(v,mn,mx){return Math.min(mx,Math.max(mn,v));}
 
+// ═══════════════════════════════════════════
+// UI UPDATE
+// ═══════════════════════════════════════════
 const GEAR_COLORS={N:'#00b4ff','1':'#ff8000','R':'#ff3d1a'};
 
 function updateUI(){
@@ -735,11 +914,11 @@ function updateUI(){
 }
 
 function updateSlots(){
-  for(let i=0;i<PANEL_COUNT;i++){
+  for(let i=0;i<PANEL_SLOTS.length;i++){
     const wid=PANEL_SLOTS[i];
     const def=WIDGETS[wid];
     if(!def) continue;
-    if(def.special==='gball') continue;
+    if(def.special==='gball') continue;  // onMotion 直接更新
     if(def.special==='gear'){
       const gvEl=document.getElementById(`gv-${i}`);
       const gfEl=document.getElementById(`gf-${i}`);
@@ -775,6 +954,9 @@ function updateSlots(){
   }
 }
 
+// ═══════════════════════════════════════════
+// PICKER (絵文字なし)
+// ═══════════════════════════════════════════
 let _pickerSlot=-1;
 function openPicker(slotIndex){
   _pickerSlot=slotIndex;
@@ -796,12 +978,12 @@ function buildPickerGrid(){
     card.className='picker-card'+(key===current?' active':'');
     let preview='';
     if(def.special==='gear'){preview=S.gear;}
-    else if(def.special!=='gball'){
+    else if(def.special==='gball'){preview='2D';}
+    else{
       const v=def.getValue();
       preview=(v!==null&&v!==undefined)?`${v}${def.unit}`:'--';
     }
     card.innerHTML=`
-      <span class="picker-card-ico">${def.icon}</span>
       <div class="picker-card-lbl">${def.label}</div>
       <div class="picker-card-val">${preview}</div>`;
     card.addEventListener('click',()=>selectWidget(key));
@@ -813,21 +995,26 @@ function selectWidget(key){
   PANEL_SLOTS[_pickerSlot]=key;
   saveSlots(PANEL_SLOTS);
   renderSlot(_pickerSlot);
+  recomputeActivePids();    // 表示が変わったらPIDセットを再計算
   closePicker();
   updateUI();
 }
 
+// ═══════════════════════════════════════════
+// CONFIG MODAL
+// ═══════════════════════════════════════════
 function openCfg(){
+  document.getElementById('cfg-panelcount').value=String(CFG.panelCount);
   document.getElementById('cfg-respmode').value=CFG.responseMode;
   document.getElementById('cfg-showboost').value=CFG.showBoost?'on':'off';
   document.getElementById('cfg-boostmin').value=CFG.boostMin;
   document.getElementById('cfg-boostmax').value=CFG.boostMax;
   document.getElementById('cfg-hpcoeff').value=CFG.hpCoeff;
   document.getElementById('cfg-maxhp').value=CFG.maxHP;
-  document.getElementById('cfg-gswapxy').value=String(CFG.gSwapXY);
+  document.getElementById('cfg-gmaxg').value=CFG.gMaxG;
+  document.getElementById('cfg-galertg').value=CFG.gAlertG;
   document.getElementById('cfg-ginvertx').value=String(CFG.gInvertX);
   document.getElementById('cfg-ginverty').value=String(CFG.gInvertY);
-  document.getElementById('cfg-gmaxg').value=CFG.gMaxG;
   document.getElementById('cfg-dotcount').value=CFG.rpmDots;
   document.getElementById('cfg-maxrpm').value=CFG.maxRpm;
   document.getElementById('cfg-warnrpm').value=CFG.warnRpm;
@@ -885,16 +1072,24 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 function saveCfg(){
+  const newCount=clamp(parseInt(document.getElementById('cfg-panelcount').value),0,5);
+  const countChanged=(newCount!==PANEL_SLOTS.length);
+  if(countChanged){
+    resizeSlots(newCount);
+    saveSlots(PANEL_SLOTS);
+  }
+  CFG.panelCount=newCount;
+
   CFG.responseMode=document.getElementById('cfg-respmode').value||'double';
   CFG.showBoost=document.getElementById('cfg-showboost').value!=='off';
   CFG.boostMin=Math.min(0,parseFloat(document.getElementById('cfg-boostmin').value)||-0.5);
   CFG.boostMax=Math.max(0.5,parseFloat(document.getElementById('cfg-boostmax').value)||2.0);
   CFG.hpCoeff=parseFloat(document.getElementById('cfg-hpcoeff').value)||0.000197;
   CFG.maxHP=parseInt(document.getElementById('cfg-maxhp').value)||250;
-  CFG.gSwapXY=document.getElementById('cfg-gswapxy').value==='true';
+  CFG.gMaxG=Math.max(0.1,parseFloat(document.getElementById('cfg-gmaxg').value)||1.5);
+  CFG.gAlertG=Math.max(0.1,parseFloat(document.getElementById('cfg-galertg').value)||1.0);
   CFG.gInvertX=document.getElementById('cfg-ginvertx').value==='true';
   CFG.gInvertY=document.getElementById('cfg-ginverty').value==='true';
-  CFG.gMaxG=parseFloat(document.getElementById('cfg-gmaxg').value)||9.8;
   CFG.rpmDots=Math.max(4,Math.min(20,parseInt(document.getElementById('cfg-dotcount').value)||12));
   CFG.maxRpm=parseInt(document.getElementById('cfg-maxrpm').value)||6200;
   CFG.warnRpm=parseInt(document.getElementById('cfg-warnrpm').value)||4800;
@@ -917,7 +1112,10 @@ function saveCfg(){
   applyBoostVisibility();
   try{localStorage.setItem('gtdash_cfg_v3',JSON.stringify(CFG));}catch(_){}
   GEAR_TABLE=buildGearTable();
-  buildLeds();renderAllSlots();updateUI();closeCfg();
+  buildLeds();
+  if(countChanged) buildPanels(); else renderAllSlots();
+  recomputeActivePids();
+  updateUI();closeCfg();
 }
 function resetCfg(){
   if(!confirm('全設定を初期化しますか？')) return;
@@ -925,13 +1123,16 @@ function resetCfg(){
   PANEL_SLOTS=[...DEFAULT_SLOTS];
   try{localStorage.removeItem('gtdash_cfg_v3');localStorage.removeItem('gtdash_slots_v3');}catch(_){}
   GEAR_TABLE=buildGearTable();
-  buildLeds();renderAllSlots();updateUI();openCfg();
+  buildLeds();buildPanels();recomputeActivePids();updateUI();openCfg();
 }
 function applyBoostVisibility(){
   const el=document.getElementById('boost-bar-wrap');
   if(el) el.style.display=CFG.showBoost?'':'none';
 }
 
+// ═══════════════════════════════════════════
+// QUICK CONNECT
+// ═══════════════════════════════════════════
 const STORAGE_DEV='gtdash_last_device';
 function saveDevice(id,name){try{localStorage.setItem(STORAGE_DEV,JSON.stringify({id,name}));}catch(_){}}
 function loadDevice(){try{return JSON.parse(localStorage.getItem(STORAGE_DEV));}catch(_){return null;}}
@@ -943,7 +1144,7 @@ function _addDisconnectHandler(device){
     clearInterval(_pollTimer);clearTimeout(_timeoutTimer);clearInterval(_watchdogTimer);
     Object.assign(S,{rpm:0,speed:0,coolant:null,intake:null,
       mapKpa:null,boost:null,oilTemp:null,throttle:null,instHP:null,
-      gearCand:'N',gearCnt:0,buf:'',waiting:false,pidParsedThisCycle:false});
+      gearCand:'N',gearCnt:0,buf:'',waiting:false});
     _ratioHistory.length=0;
     if(!_reconnecting){S.conn='Disconnected';updateUI();}
   });
@@ -968,6 +1169,9 @@ function checkAutoConnect(){
   document.getElementById('modal-quick').classList.add('show');
 }
 
+// ═══════════════════════════════════════════
+// BLE
+// ═══════════════════════════════════════════
 function send(cmd){
   if(!S.txChar) return;
   S.txChar.writeValueWithoutResponse(new TextEncoder().encode(cmd+'\r')).catch(e=>console.warn('[SEND]',e));
@@ -1028,6 +1232,7 @@ async function _initAfterConnect(server,device){
     send('ATZ');await sleep(1600);
     for(const cmd of ['ATE0','ATL0','ATS0','ATH0','ATSP0']){send(cmd);await sleep(400);}
     S.conn='Connected';S.polling=true;
+    recomputeActivePids();
     S.pidQueue=nextPids();
     updateUI();poll();
   }catch(e){console.error('[BLE]',e);S.conn='Disconnected';updateUI();}
@@ -1059,6 +1264,7 @@ function poll(){
     if(!S.polling||S.conn!=='Connected'){clearInterval(_pollTimer);return;}
     if(S.waiting) return;
     if(!S.pidQueue.length) S.pidQueue=nextPids();
+    if(!S.pidQueue.length) return;  // PIDが全くない場合
     S.curPid=S.pidQueue.shift();
     S.waiting=true;
     send(S.curPid);
@@ -1103,7 +1309,7 @@ document.addEventListener('visibilitychange',()=>{
 let _dbgLog='';
 function dbg(msg){
   _dbgLog=msg+'\n'+_dbgLog;
-  if(_dbgLog.length>1200) _dbgLog=_dbgLog.slice(0,1200);
+  if(_dbgLog.length>1500) _dbgLog=_dbgLog.slice(0,1500);
   const el=document.getElementById('dbg-overlay');
   if(el&&el.classList.contains('show')) el.textContent=_dbgLog;
 }
@@ -1163,10 +1369,13 @@ async function requestWakeLock(){
   catch(e){console.warn('[WakeLock]',e);}
 }
 
+// ═══════════════════════════════════════════
 // INIT
+// ═══════════════════════════════════════════
 buildLeds();
 applyBoostVisibility();
-renderAllSlots();
+buildPanels();
+recomputeActivePids();
 updateUI();
 setupGSensor();
 requestWakeLock();
