@@ -421,7 +421,13 @@ function setupGSensor(){
   window.addEventListener('orientationchange',()=>{_gInit=false;});
 }
 
+// G-sensor スロットル (50ms = 20Hz に制限)
+let _lastMotionAt=0;
+
 function onMotion(e){
+  const now=Date.now();
+  if(now-_lastMotionAt<50) return;  // 50ms未満は無視
+  _lastMotionAt=now;
   const a=e.accelerationIncludingGravity;
   if(!a||a.x===null||a.x===undefined) return;
   const ax=a.x||0, ay=a.y||0, az=a.z||0;
@@ -742,6 +748,9 @@ function saveDevice(id,name){try{localStorage.setItem(STORAGE_DEV,JSON.stringify
 function loadDevice(){try{return JSON.parse(localStorage.getItem(STORAGE_DEV));}catch(_){return null;}}
 
 function _addDisconnectHandler(device){
+  // 重複登録防止
+  if(_disconnectListenerAdded) return;
+  _disconnectListenerAdded=true;
   device.addEventListener('gattserverdisconnected',()=>{
     console.log('[BLE] disconnected');
     S.polling=false;S.txChar=null;
@@ -782,6 +791,10 @@ function send(cmd){
   S.txChar.writeValueWithoutResponse(new TextEncoder().encode(cmd+'\r')).catch(e=>console.warn('[SEND]',e));
 }
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// リスナー重複登録防止フラグ
+let _dataListenerAdded = false;
+let _disconnectListenerAdded = false;
 
 async function startBLE(){
   closeModal();
@@ -832,12 +845,16 @@ async function _initAfterConnect(server,device){
     if(!txChar||!rxChar){S.conn='Match failed';updateUI();alert('ELM327のCharacteristicが見つかりません。');return;}
     S.txChar=txChar;
     await rxChar.startNotifications();
-    rxChar.addEventListener('characteristicvaluechanged',onData);
+    // ← 重複登録防止: 初回のみ登録
+    if(!_dataListenerAdded){
+      rxChar.addEventListener('characteristicvaluechanged',onData);
+      _dataListenerAdded=true;
+    }
     await sleep(500);
     send('ATZ');await sleep(1600);
     for(const cmd of ['ATE0','ATL0','ATS0','ATH0','ATSP0']){send(cmd);await sleep(400);}
     S.conn='Connected';S.polling=true;
-    if(_btConnectedAt===null) startTimer();   // ← 接続成功でタイマー開始（再接続では維持しない=リセット済み）
+    if(_btConnectedAt===null) startTimer();
     recomputeActivePids();
     S.pidQueue=nextPids();
     updateUI();poll();
