@@ -521,6 +521,8 @@ function updateUI(){
   btn.className=S.conn==='Connected'?'disc':'';
   const rl=document.getElementById('ratio-label');
   rl.textContent=S.speed>2?`${(S.rpm/S.speed).toFixed(1)} r/v`:'';
+  // boost/mapKpa は上部バーとスロット両方で使い終わったのでクリア
+  S.boost=null; S.mapKpa=null;
 }
 
 function updateSlots(){
@@ -562,6 +564,12 @@ function updateSlots(){
       }
     }
   }
+  // 表示済みのスロー系センサー値を即クリア (消費パターン)
+  // RPM / Speed は gear検出・LED・ratio表示で常時必要なので保持
+  S.coolant=null; S.intake=null; S.oilTemp=null;
+  S.throttle=null; S.instHP=null;
+  // boost は上部バー表示でも使うので updateUI 内で消費、ここでは保持しない
+  // → updateUI末尾でクリア
 }
 
 // ═══════════════════════════════════════════
@@ -850,6 +858,11 @@ const WATCHDOG_MS=3000,NO_DATA_MS=5000,MAX_TIMEOUTS=8;
 
 function onData(event){
   try{S.buf+=new TextDecoder().decode(event.target.value);}catch(_){return;}
+  // buf肥大化ガード: 512byte超えたら破棄してリセット
+  if(S.buf.length>512){
+    dbg('[BUF] overflow → clear');
+    S.buf='';S.waiting=false;return;
+  }
   if(!S.buf.includes('>')&&S.buf.split('\r').filter(x=>x.trim()).length<1) return;
   clearTimeout(_timeoutTimer);
   const r=S.buf;S.buf='';
@@ -894,6 +907,14 @@ function startWatchdog(){
 async function attemptReconnect(){
   if(_reconnecting) return;
   _reconnecting=true;S.conn='Reconnecting...';updateUI();
+  // 安全弁: 20秒以内に完了しなければ強制リセット
+  const safetyTimer=setTimeout(()=>{
+    if(_reconnecting){
+      dbg('[RECONNECT] timeout → force reset');
+      _reconnecting=false;
+      S.conn='Disconnected';updateUI();
+    }
+  },20000);
   try{
     S.polling=false;
     clearInterval(_pollTimer);clearTimeout(_timeoutTimer);clearInterval(_watchdogTimer);
@@ -903,7 +924,7 @@ async function attemptReconnect(){
     if(S.device){const server=await S.device.gatt.connect();await _initAfterConnect(server,S.device);}
     else{S.conn='Disconnected';updateUI();}
   }catch(e){console.error('[WD reconnect]',e);S.conn='Disconnected';updateUI();}
-  finally{_reconnecting=false;}
+  finally{clearTimeout(safetyTimer);_reconnecting=false;}
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
@@ -916,16 +937,27 @@ document.addEventListener('visibilitychange',()=>{
 // DEBUG
 // ═══════════════════════════════════════════
 let _dbgLog='';
+let _dbgVisible=false;
 function dbg(msg){
+  // 非表示時は文字列操作を一切しない
+  if(!_dbgVisible) return;
   _dbgLog=msg+'\n'+_dbgLog;
-  if(_dbgLog.length>1500) _dbgLog=_dbgLog.slice(0,1500);
+  if(_dbgLog.length>800) _dbgLog=_dbgLog.slice(0,800);
   const el=document.getElementById('dbg-overlay');
-  if(el&&el.classList.contains('show')) el.textContent=_dbgLog;
+  if(el) el.textContent=_dbgLog;
 }
 function toggleDbg(){
   const el=document.getElementById('dbg-overlay');
-  el.classList.toggle('show');
-  if(el.classList.contains('show')) el.textContent=_dbgLog;
+  _dbgVisible=!_dbgVisible;
+  if(_dbgVisible){
+    el.classList.add('show');
+    el.textContent=_dbgLog;
+  }else{
+    el.classList.remove('show');
+    // 閉じたら即クリア
+    _dbgLog='';
+    el.textContent='';
+  }
 }
 
 function parseLine(pid,raw){
@@ -977,9 +1009,24 @@ if('serviceWorker' in navigator){
 let _wakeLock=null;
 async function requestWakeLock(){
   if(!('wakeLock' in navigator)) return;
-  try{_wakeLock=await navigator.wakeLock.request('screen');}
-  catch(e){console.warn('[WakeLock]',e);}
+  try{
+    _wakeLock=await navigator.wakeLock.request('screen');
+    // 解放されたら自動で再取得
+    _wakeLock.addEventListener('release',()=>{
+      dbg('[WakeLock] released → re-acquire');
+      setTimeout(requestWakeLock,500);
+    });
+    dbg('[WakeLock] acquired');
+  }catch(e){
+    console.warn('[WakeLock]',e);
+    // 失敗しても30秒後に再試行
+    setTimeout(requestWakeLock,30000);
+  }
 }
+// 5分ごとに念のため再取得 (OS強制解放対策)
+setInterval(()=>{
+  if(document.visibilityState==='visible') requestWakeLock();
+},5*60*1000);
 
 // ═══════════════════════════════════════════
 // 画面向き自動横化
