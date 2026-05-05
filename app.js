@@ -192,7 +192,13 @@ function recomputeActivePids(){
   ACTIVE_PIDS_FAST=[...fast];
   ACTIVE_PIDS_SLOW=[...slow];
   _slowIdx=0;
+  // キューリセット時に waiting/タイムアウト/lastDataAt も同時リセット
+  // → ウォッチドッグの誤検知を防ぐ
   S.pidQueue=[];
+  S.waiting=false;
+  clearTimeout(_timeoutTimer);
+  _consecutiveTimeouts=0;
+  _lastDataAt=Date.now();
   dbg('[PID] fast='+JSON.stringify(ACTIVE_PIDS_FAST)+' slow='+JSON.stringify(ACTIVE_PIDS_SLOW));
 }
 
@@ -612,7 +618,7 @@ function selectWidget(key){
   PANEL_SLOTS[_pickerSlot]=key;
   saveSlots(PANEL_SLOTS);
   renderSlot(_pickerSlot);
-  recomputeActivePids();
+  recomputeActivePids();   // 内部で _lastDataAt もリセット済み
   closePicker();
   updateUI();
 }
@@ -754,7 +760,8 @@ function _addDisconnectHandler(device){
   device.addEventListener('gattserverdisconnected',()=>{
     console.log('[BLE] disconnected');
     S.polling=false;S.txChar=null;
-    clearInterval(_pollTimer);clearTimeout(_timeoutTimer);clearInterval(_watchdogTimer);
+    clearInterval(_pollTimer);clearTimeout(_timeoutTimer);
+    clearInterval(_watchdogTimer);stopKeepAlive();
     Object.assign(S,{rpm:0,speed:0,coolant:null,intake:null,
       mapKpa:null,boost:null,oilTemp:null,throttle:null,instHP:null,
       gearCand:'N',gearCnt:0,buf:'',waiting:false});
@@ -852,18 +859,36 @@ async function _initAfterConnect(server,device){
     }
     await sleep(500);
     send('ATZ');await sleep(1600);
-    for(const cmd of ['ATE0','ATL0','ATS0','ATH0','ATSP0']){send(cmd);await sleep(400);}
+    // ATST FF: ELM327タイムアウトを最大(約4秒)に設定 → 勝手な切断を防ぐ
+    for(const cmd of ['ATE0','ATL0','ATS0','ATH0','ATST FF','ATSP0']){send(cmd);await sleep(400);}
     S.conn='Connected';S.polling=true;
     if(_btConnectedAt===null) startTimer();
     recomputeActivePids();
     S.pidQueue=nextPids();
+    startKeepAlive();   // ← BLE Keep-Alive 開始
     updateUI();poll();
   }catch(e){console.error('[BLE]',e);S.conn='Disconnected';updateUI();}
 }
 
-let _pollTimer=null,_timeoutTimer=null,_watchdogTimer=null;
+let _pollTimer=null,_timeoutTimer=null,_watchdogTimer=null,_keepAliveTimer=null;
 let _consecutiveTimeouts=0,_lastDataAt=0,_reconnecting=false;
-const WATCHDOG_MS=3000,NO_DATA_MS=5000,MAX_TIMEOUTS=8;
+// ウォッチドッグ閾値を緩和 (誤検知防止)
+const WATCHDOG_MS=5000,NO_DATA_MS=15000,MAX_TIMEOUTS=15;
+
+// BLE Keep-Alive: 30秒ごとに無害なATコマンドを送りAndroidの切断を防ぐ
+function startKeepAlive(){
+  if(_keepAliveTimer) clearInterval(_keepAliveTimer);
+  _keepAliveTimer=setInterval(()=>{
+    if(S.conn!=='Connected'||!S.txChar) return;
+    // AT I (ELM327のデバイス情報取得) = 無害で応答が返るコマンド
+    send('AT I');
+    dbg('[KEEP-ALIVE] sent AT I');
+  },30000);
+}
+function stopKeepAlive(){
+  clearInterval(_keepAliveTimer);
+  _keepAliveTimer=null;
+}
 
 function onData(event){
   try{S.buf+=new TextDecoder().decode(event.target.value);}catch(_){return;}
@@ -926,7 +951,8 @@ async function attemptReconnect(){
   },20000);
   try{
     S.polling=false;
-    clearInterval(_pollTimer);clearTimeout(_timeoutTimer);clearInterval(_watchdogTimer);
+    clearInterval(_pollTimer);clearTimeout(_timeoutTimer);
+    clearInterval(_watchdogTimer);stopKeepAlive();
     S.txChar=null;S.buf='';S.waiting=false;
     if(S.device?.gatt?.connected){try{S.device.gatt.disconnect();}catch(_){}}
     await sleep(500);
@@ -1097,6 +1123,7 @@ function bindEvents(){
 // SPLASH
 // ═══════════════════════════════════════════
 function showSplash(){
+  // ① タイトル画面
   const splash = document.createElement('div');
   splash.id = 'splash';
   Object.assign(splash.style, {
@@ -1105,7 +1132,7 @@ function showSplash(){
     display:'flex', flexDirection:'column',
     alignItems:'center', justifyContent:'center',
     gap:'12px',
-    transition:'opacity 0.6s ease',
+    transition:'opacity 0.5s ease',
   });
   splash.innerHTML = `
     <div style="font-style:italic;font-weight:900;
@@ -1118,11 +1145,53 @@ function showSplash(){
       letter-spacing:0.2em;color:#5a6068;margin-top:4px;">Ver.1</div>`;
   document.body.appendChild(splash);
 
+  // 3秒後にタイトルをフェードアウト → 忠告画面へ
+  setTimeout(()=>{
+    splash.style.opacity='0';
+    setTimeout(()=>{
+      splash.remove();
+      showWarning();
+    },500);
+  },3000);
+}
+
+function showWarning(){
+  // ② 忠告画面
+  const warn = document.createElement('div');
+  warn.id = 'warning-screen';
+  Object.assign(warn.style,{
+    position:'fixed', inset:'0', zIndex:'9998',
+    background:'#000',
+    display:'flex', flexDirection:'column',
+    alignItems:'center', justifyContent:'center',
+    gap:'18px', padding:'24px',
+    transition:'opacity 0.5s ease',
+  });
+  warn.innerHTML = `
+    <div style="font-size:clamp(18px,4vw,28px);font-weight:900;
+      color:#ff3d1a;letter-spacing:0.08em;text-align:center;">
+      ⚠ 安全のためご確認ください
+    </div>
+    <div style="font-size:clamp(12px,2.2vw,18px);color:#ffffff;
+      line-height:1.9;text-align:center;max-width:520px;">
+      走行中の操作は危険です。<br>
+      必ず停車中に設定を行ってください。<br><br>
+      <span style="color:#ffd200;">
+        Bluetooth接続後の設定変更は<br>
+        予期しない切断の原因になります。<br>
+        接続前にウィジェットの設定を完了させてください。
+      </span>
+    </div>
+    <div style="font-size:clamp(9px,1.2vw,11px);color:#5a6068;margin-top:8px;">
+      自動的に閉じます
+    </div>`;
+  document.body.appendChild(warn);
+
   // 3秒後にフェードアウト → 削除
   setTimeout(()=>{
-    splash.style.opacity = '0';
-    setTimeout(()=>splash.remove(), 650);
-  }, 3000);
+    warn.style.opacity='0';
+    setTimeout(()=>warn.remove(),500);
+  },3000);
 }
 
 // ═══════════════════════════════════════════
