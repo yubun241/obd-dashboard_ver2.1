@@ -1,10 +1,13 @@
+cat > ~/gtdash/.well-known/assetlinks.json << 'EOF'
 [{
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "jp.fujii_kogei.gtdash",
+    "package_name": "jp.co.fujii_kogei.obd2gtdash",
     "sha256_cert_fingerprints": [
       "1B:AF:7D:C4:73:91:5D:92:7C:FC:30:01:92:AA:74:0D:1E:92:CC:0C:D2:24:A0:A6:00:62:1A:95:39:CD:96:64"
     ]
   }
 }]
+EOF
+cat ~/gtdash/.well-known/assetlinks.json
