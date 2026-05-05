@@ -521,8 +521,6 @@ function updateUI(){
   btn.className=S.conn==='Connected'?'disc':'';
   const rl=document.getElementById('ratio-label');
   rl.textContent=S.speed>2?`${(S.rpm/S.speed).toFixed(1)} r/v`:'';
-  // boost/mapKpa は上部バーとスロット両方で使い終わったのでクリア
-  S.boost=null; S.mapKpa=null;
 }
 
 function updateSlots(){
@@ -564,12 +562,6 @@ function updateSlots(){
       }
     }
   }
-  // 表示済みのスロー系センサー値を即クリア (消費パターン)
-  // RPM / Speed は gear検出・LED・ratio表示で常時必要なので保持
-  S.coolant=null; S.intake=null; S.oilTemp=null;
-  S.throttle=null; S.instHP=null;
-  // boost は上部バー表示でも使うので updateUI 内で消費、ここでは保持しない
-  // → updateUI末尾でクリア
 }
 
 // ═══════════════════════════════════════════
