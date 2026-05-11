@@ -317,7 +317,6 @@ function renderSlot(i){
         <span class="gear-label-inner">GEAR</span>
       </div>`;
   }else if(def.special==='gball'){
-    // 数値表示なし、ラベル A→F
     el.innerHTML=`
       <button class="edit-btn" data-slot="${i}">✎</button>
       <div class="s-label">G-METER</div>
@@ -1156,7 +1155,7 @@ function showSplash(){
 }
 
 function showWarning(){
-  // ② 忠告画面
+  // ② 忠告画面 (日英同一画面・OKボタン必須)
   const warn = document.createElement('div');
   warn.id = 'warning-screen';
   Object.assign(warn.style,{
@@ -1164,34 +1163,53 @@ function showWarning(){
     background:'#000',
     display:'flex', flexDirection:'column',
     alignItems:'center', justifyContent:'center',
-    gap:'18px', padding:'24px',
+    gap:'14px', padding:'24px',
     transition:'opacity 0.5s ease',
   });
   warn.innerHTML = `
-    <div style="font-size:clamp(18px,4vw,28px);font-weight:900;
+    <div style="font-size:clamp(16px,3.6vw,26px);font-weight:900;
       color:#ff3d1a;letter-spacing:0.08em;text-align:center;">
-      ⚠ 安全のためご確認ください
+      ⚠ 安全のためご確認ください &nbsp;/&nbsp; Safety Notice
     </div>
-    <div style="font-size:clamp(12px,2.2vw,18px);color:#ffffff;
-      line-height:1.9;text-align:center;max-width:520px;">
-      走行中の操作は危険です。<br>
-      必ず停車中に設定を行ってください。<br><br>
-      <span style="color:#ffd200;">
-        Bluetooth接続後の設定変更は<br>
-        予期しない切断の原因になります。<br>
-        接続前にウィジェットの設定を完了させてください。
+    <div style="font-size:clamp(11px,2vw,16px);color:#ffffff;
+      line-height:2.0;text-align:center;max-width:560px;">
+      走行中の操作は危険です。必ず停車中に設定を行ってください。<br>
+      <span style="color:#aaaaaa;">
+        Operating while driving is dangerous. Always configure while stopped.
       </span>
     </div>
-    <div style="font-size:clamp(9px,1.2vw,11px);color:#5a6068;margin-top:8px;">
-      自動的に閉じます
-    </div>`;
+    <div style="border-top:1px solid #2a2a2a;width:100%;max-width:560px;"></div>
+    <div style="font-size:clamp(11px,2vw,16px);color:#ffffff;
+      line-height:2.0;text-align:center;max-width:560px;">
+      <span style="color:#ffd200;">
+        Bluetooth接続後の設定変更は予期しない切断の原因になります。<br>
+        接続前にウィジェットの設定を完了させてください。
+      </span><br>
+      <span style="color:#b8960a;">
+        Changing settings after connecting may cause unexpected disconnection.<br>
+        Please finish widget setup before connecting.
+      </span>
+    </div>
+    <button id="warn-ok-btn" style="
+      margin-top:8px;
+      padding:12px 48px;
+      font-size:clamp(14px,2.4vw,18px);
+      font-weight:900;
+      letter-spacing:0.12em;
+      color:#000000;
+      background:#ff3d1a;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      transition:background 0.2s;
+    ">OK — 確認しました</button>`;
   document.body.appendChild(warn);
 
-  // 3秒後にフェードアウト → 削除
-  setTimeout(()=>{
+  // OKボタンを押すまで遷移しない
+  document.getElementById('warn-ok-btn').addEventListener('click',()=>{
     warn.style.opacity='0';
     setTimeout(()=>warn.remove(),500);
-  },3000);
+  });
 }
 
 // ═══════════════════════════════════════════
