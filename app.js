@@ -11,7 +11,7 @@ const G_PER_MS2 = 1/9.80665;  // m/s² → G
 const S = {
   rpm:0,speed:0,coolant:null,intake:null,
   mapKpa:null,boost:null,oilTemp:null,throttle:null,instHP:null,
-  gx:0, gy:0,                      // [G] gx:画面右=正 / gy:慣性球準拠(加速時→B下へ転がる向き)
+  gx:0, gy:0,                      // [G] 慣性球準拠: gx正=L(左) / gy負=B(下) — 加速・右折で球が後/左へ
   gear:'N',gearCand:'N',gearCnt:0,
   conn:'Disconnected',device:null,txChar:null,
   polling:false,waiting:false,buf:'',
@@ -464,7 +464,7 @@ function onMotion(e){
 
   // [G]に変換 + 反転オプション適用
   // 縦Gは慣性球準拠: 加速(前進)→B(下) / ブレーキ→F(上) に転がるよう符号設定
-  S.gx =  sx * G_PER_MS2 * (CFG.gInvertX?-1:1);
+  S.gx = -sx * G_PER_MS2 * (CFG.gInvertX?-1:1);
   S.gy =  lz * G_PER_MS2 * (CFG.gInvertY?-1:1);
 
   updateGballs();
