@@ -1142,7 +1142,7 @@ function showSplash(){
       font-size:clamp(14px,2.8vw,26px);
       letter-spacing:0.3em;color:#22e54a;">藤井工藝</div>
     <div style="font-size:clamp(9px,1.2vw,12px);
-      letter-spacing:0.2em;color:#5a6068;margin-top:4px;">Ver.1</div>`;
+      letter-spacing:0.2em;color:#5a6068;margin-top:4px;">Ver.2</div>`;
   document.body.appendChild(splash);
 
   // 3秒後にタイトルをフェードアウト → 忠告画面へ

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'fujii-kogei-v3-014';
+const CACHE_VERSION = 'fujii-kogei-v3-015';
 const CACHE_FILES = [
   './',
   './index.html',
