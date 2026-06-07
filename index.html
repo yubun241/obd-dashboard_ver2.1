@@ -125,19 +125,13 @@
     </div>
     <div class="cfg-note">※ 立てた状態で停車中に押す</div>
     <div class="cfg-row" style="margin-top:6px;">
-      <label>横軸 反転</label>
-      <select id="cfg-ginvertx">
-        <option value="false">正方向</option>
-        <option value="true">反転</option>
-      </select>
+      <label>G-ball モード</label>
+      <div style="display:flex;gap:6px;flex:1;">
+        <button id="cfg-gmode-vec" class="seg-btn" style="flex:1;padding:6px 10px;">ベクトル式</button>
+        <button id="cfg-gmode-ine" class="seg-btn active" style="flex:1;padding:6px 10px;">慣性式</button>
+      </div>
     </div>
-    <div class="cfg-row">
-      <label>縦軸 反転</label>
-      <select id="cfg-ginverty">
-        <option value="false">正方向</option>
-        <option value="true">反転</option>
-      </select>
-    </div>
+    <div class="cfg-note">ベクトル式：G方向を直接表示 / 慣性式：ボールが慣性方向に転がる（物理球）</div>
 
     <h4>RPM ドット / 警告</h4>
     <div class="cfg-row">

@@ -105,7 +105,7 @@ const DEFAULT_CFG = {
   // G-meter (G単位)
   gMaxG:1.5,           // 表示円の端=1.5G
   gAlertG:1.0,         // 1.0Gでアラート
-  gInvertX:false, gInvertY:false,
+  gMode:'inertia',
   // RPM
   maxRpm:6200,warnRpm:4800,rpmDots:12,
   dotConfig:[
@@ -464,8 +464,10 @@ function onMotion(e){
 
   // [G]に変換 + 反転オプション適用
   // 縦Gは慣性球準拠: 加速(前進)→B(下) / ブレーキ→F(上) に転がるよう符号設定
-  S.gx = -sx * G_PER_MS2 * (CFG.gInvertX?-1:1);
-  S.gy =  lz * G_PER_MS2 * (CFG.gInvertY?-1:1);
+  // ベクトル式: G方向を直接表示 / 慣性式: ボールが慣性方向（G逆向き）に転がる
+  const _gSign = (CFG.gMode === 'vector') ? -1 : 1;
+  S.gx = -sx * G_PER_MS2 * _gSign;
+  S.gy =  lz * G_PER_MS2 * _gSign;
 
   updateGballs();
 }
@@ -636,8 +638,12 @@ function openCfg(){
   document.getElementById('cfg-maxhp').value=CFG.maxHP;
   document.getElementById('cfg-gmaxg').value=CFG.gMaxG;
   document.getElementById('cfg-galertg').value=CFG.gAlertG;
-  document.getElementById('cfg-ginvertx').value=String(CFG.gInvertX);
-  document.getElementById('cfg-ginverty').value=String(CFG.gInvertY);
+  const _gmVec = document.getElementById('cfg-gmode-vec');
+  const _gmIne = document.getElementById('cfg-gmode-ine');
+  if(_gmVec){ _gmVec.classList.toggle('active', CFG.gMode === 'vector');
+    _gmVec.onclick = () => { _gmVec.classList.add('active'); _gmIne.classList.remove('active'); }; }
+  if(_gmIne){ _gmIne.classList.toggle('active', CFG.gMode !== 'vector');
+    _gmIne.onclick = () => { _gmIne.classList.add('active'); _gmVec.classList.remove('active'); }; }
   document.getElementById('cfg-dotcount').value=CFG.rpmDots;
   document.getElementById('cfg-maxrpm').value=CFG.maxRpm;
   document.getElementById('cfg-warnrpm').value=CFG.warnRpm;
@@ -704,8 +710,7 @@ function saveCfg(){
   CFG.maxHP=parseInt(document.getElementById('cfg-maxhp').value)||250;
   CFG.gMaxG=Math.max(0.1,parseFloat(document.getElementById('cfg-gmaxg').value)||1.5);
   CFG.gAlertG=Math.max(0.1,parseFloat(document.getElementById('cfg-galertg').value)||1.0);
-  CFG.gInvertX=document.getElementById('cfg-ginvertx').value==='true';
-  CFG.gInvertY=document.getElementById('cfg-ginverty').value==='true';
+  CFG.gMode = document.getElementById('cfg-gmode-vec')?.classList.contains('active') ? 'vector' : 'inertia';
   CFG.rpmDots=Math.max(4,Math.min(20,parseInt(document.getElementById('cfg-dotcount').value)||12));
   CFG.maxRpm=parseInt(document.getElementById('cfg-maxrpm').value)||6200;
   CFG.warnRpm=parseInt(document.getElementById('cfg-warnrpm').value)||4800;
