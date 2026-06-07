@@ -216,7 +216,7 @@ body{
 .cfg-dot-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:10px;}
 .cfg-dot-row span{color:var(--text-dim);min-width:30px;}
 .cfg-gear-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:11px;}
-.cfg-gear-row span{color:var(--text-dim);min-width:50px;}
+.cfg-gear-row span{color:var(--text-dim);min-width:88px;}
 .cfg-gear-row input{background:#000;color:var(--text);
   border:1px solid var(--line);border-radius:4px;padding:3px 6px;
   width:90px;font-size:11px;}
